@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Инвест-Навигатор</title>
+  <style>
+    body { background: #fdfaf4; font-family: sans-serif; color: #333; padding: 2rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    input { width: 100%; box-sizing: border-box; padding: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Инвест-Навигатор: Калькулятор окупаемости</h1>
+  <p>Измените параметры и рассчитайте эффективность объекта за 20 лет.</p>
+  <div id="calculator"></div>
+  <script>
+    const container = document.getElementById("calculator");
+    const table = document.createElement("table");
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Год</th>
+          <th>Выручка</th>
+          <th>Переменные</th>
+          <th>Постоянные</th>
+          <th>Капремонт</th>
+          <th>Чистая прибыль</th>
+          <th>Капитализация</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${Array.from({ length: 20 }).map((_, i) => {
+          const year = i + 1;
+          const revenue = Math.round(1296000 * (1.07 ** i));
+          const variable = Math.round(600000 * (1.05 ** i));
+          const fixed = Math.round(350000 * (1.05 ** i));
+          const repair = year === 1 ? 430450 : 0;
+          const profit = revenue - variable - fixed - repair;
+          const capital = Math.round(9600000 * (1.07 ** year));
+          return `
+            <tr>
+              <td>Год ${year}</td>
+              <td><input value="${revenue}" onchange="recalc(this)"/></td>
+              <td><input value="${variable}" onchange="recalc(this)"/></td>
+              <td><input value="${fixed}" onchange="recalc(this)"/></td>
+              <td><input value="${repair}" onchange="recalc(this)"/></td>
+              <td class="profit">${profit}</td>
+              <td class="capital">${capital}</td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    `;
+    container.appendChild(table);
+
+    function recalc(input) {
+      const row = input.closest("tr");
+      const cells = row.querySelectorAll("input");
+      const values = Array.from(cells).map(cell => parseFloat(cell.value) || 0);
+      const profit = values[0] - values[1] - values[2] - values[3];
+      const year = parseInt(row.children[0].textContent.replace("Год ", ""));
+      const capital = Math.round(9600000 * (1.07 ** year));
+      row.querySelector(".profit").textContent = Math.round(profit);
+      row.querySelector(".capital").textContent = capital;
+    }
+  </script>
+</body>
+</html>
